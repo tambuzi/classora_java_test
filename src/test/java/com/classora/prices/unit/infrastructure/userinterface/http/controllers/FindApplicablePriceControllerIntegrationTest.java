@@ -1,0 +1,95 @@
+package com.classora.prices.unit.infrastructure.userinterface.http.controllers;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class FindApplicablePriceControllerIntegrationTest {
+
+    private static final String PRICES_URI = "/api/v1/prices";
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @ParameterizedTest(name = "Test {index}: at {0} product {1} brand {2} -> tariff {3}, price {4}")
+    @CsvSource({
+            "2020-06-14T10:00:00, 35455, 1, 1, 35.50, 2020-06-14T00:00:00, 2020-12-31T23:59:59",
+            "2020-06-14T16:00:00, 35455, 1, 2, 25.45, 2020-06-14T15:00:00, 2020-06-14T18:30:00",
+            "2020-06-14T21:00:00, 35455, 1, 1, 35.50, 2020-06-14T00:00:00, 2020-12-31T23:59:59",
+            "2020-06-15T10:00:00, 35455, 1, 3, 30.50, 2020-06-15T00:00:00, 2020-06-15T11:00:00",
+            "2020-06-16T21:00:00, 35455, 1, 4, 38.95, 2020-06-15T16:00:00, 2020-12-31T23:59:59"
+    })
+    @DisplayName("Should return the applicable price for the mandated test cases")
+    void shouldReturnTheApplicablePrice(String applicationDate, String productId, String brandId,
+                                        int priceList, String price, String startDate, String endDate) throws Exception {
+        mockMvc.perform(get(PRICES_URI)
+                        .param("applicationDate", applicationDate)
+                        .param("productId", productId)
+                        .param("brandId", brandId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productId").value(35455))
+                .andExpect(jsonPath("$.brandId").value(1))
+                .andExpect(jsonPath("$.priceList").value(priceList))
+                .andExpect(jsonPath("$.price").value(Double.parseDouble(price)))
+                .andExpect(jsonPath("$.startDate").value(startDate))
+                .andExpect(jsonPath("$.endDate").value(endDate))
+                .andExpect(jsonPath("$.currency").value("EUR"));
+    }
+
+    @Test
+    void shouldReturn404WhenNoPriceApplies() throws Exception {
+        mockMvc.perform(get(PRICES_URI)
+                        .param("applicationDate", "2020-06-13T10:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void shouldReturn404ForUnknownProduct() throws Exception {
+        mockMvc.perform(get(PRICES_URI)
+                        .param("applicationDate", "2020-06-14T10:00:00")
+                        .param("productId", "99999")
+                        .param("brandId", "1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturn400WhenAParameterIsMissing() throws Exception {
+        mockMvc.perform(get(PRICES_URI)
+                        .param("applicationDate", "2020-06-14T10:00:00")
+                        .param("productId", "35455"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void shouldReturn400WhenTheDateIsMalformed() throws Exception {
+        mockMvc.perform(get(PRICES_URI)
+                        .param("applicationDate", "not-a-date")
+                        .param("productId", "35455")
+                        .param("brandId", "1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400WhenAnIdIsNotPositive() throws Exception {
+        mockMvc.perform(get(PRICES_URI)
+                        .param("applicationDate", "2020-06-14T10:00:00")
+                        .param("productId", "35455")
+                        .param("brandId", "-1"))
+                .andExpect(status().isBadRequest());
+    }
+}

@@ -1,0 +1,8 @@
+services:
+  prices-api:
+    build: .
+    image: classora/prices-api:latest
+    container_name: prices-api
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
