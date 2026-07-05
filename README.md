@@ -23,6 +23,11 @@ com.classora.prices
 │   └── exception
 │       └── PriceNotFoundException.java
 ├── application
+│   ├── bus
+│   │   ├── Query.java
+│   │   ├── QueryHandler.java
+│   │   ├── QueryBus.java
+│   │   └── NoQueryHandlerException.java
 │   ├── query
 │   │   ├── FindApplicablePriceQuery.java
 │   │   ├── FindApplicablePriceQueryHandler.java
@@ -43,6 +48,8 @@ com.classora.prices
     │       └── Routes.java
     ├── persistence
     │   └── PriceDatabaseFinder.java
+    ├── bus
+    │   └── InMemoryQueryBus.java
     ├── mapper
     │   ├── PriceQueryMapper.java
     │   ├── PriceRestMapper.java
@@ -57,13 +64,6 @@ src/main/resources
 └── data.sql
 ```
 
-Design decisions:
-
-- **Finder, not Repository**: the service only reads, so the domain exposes a read-only `PriceFinder` contract.
-- **Plain SQL via Spring JDBC**: the persistence adapter uses `NamedParameterJdbcTemplate` and a `RowMapper` (no ORM). Swapping the data layer stays inside `infrastructure/persistence` — the `PriceFinder` port and everything above it are untouched.
-- **Domain-authoritative rule**: the finder returns the candidate tariffs for the brand + product; `FindApplicablePriceService.execute(...)` filters by applicability date (`Price.appliesAt`) and picks the highest priority (`Price.hasHigherPriorityThan`). The business rule lives in the domain, not in SQL — overlapping tariffs per product are few, so loading candidates is cheap.
-- **Self-validating input, typed errors**: value objects and the query object validate their invariants at construction; invalid input raises a typed `InvalidQueryException` (→ 400) rather than a generic exception, so an internal bug can never masquerade as a client error.
-- **ArchUnit** enforces the layer rules (domain depends only on itself and the JDK; application never touches infrastructure).
 
 ## API
 

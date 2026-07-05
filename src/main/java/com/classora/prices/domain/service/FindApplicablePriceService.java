@@ -18,7 +18,7 @@ public class FindApplicablePriceService {
     }
 
     public Price execute(BrandId brandId, ProductId productId, LocalDateTime applicationDate) {
-        return priceFinder.findPricesFor(brandId, productId).stream()
+        return priceFinder.findApplicableCandidates(brandId, productId, applicationDate).stream()
                 .filter(price -> price.appliesAt(applicationDate))
                 .reduce((current, candidate) -> candidate.hasHigherPriorityThan(current) ? candidate : current)
                 .orElseThrow(() -> new PriceNotFoundException(brandId, productId, applicationDate));

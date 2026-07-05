@@ -93,7 +93,8 @@ pitest {
 	targetClasses = [
 			'com.classora.prices.domain.*',
 			'com.classora.prices.application.*',
-			'com.classora.prices.infrastructure.mapper.*'
+			'com.classora.prices.infrastructure.mapper.*',
+				'com.classora.prices.infrastructure.bus.*'
 	]
 	targetTests = ['com.classora.prices.unit.*']
 	outputFormats = ['HTML', 'XML']

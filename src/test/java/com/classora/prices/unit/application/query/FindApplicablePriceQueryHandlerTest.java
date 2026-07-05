@@ -45,4 +45,10 @@ class FindApplicablePriceQueryHandlerTest {
     void shouldRejectNullService() {
         assertThatNullPointerException().isThrownBy(() -> new FindApplicablePriceQueryHandler(null));
     }
+
+    @Test
+    void shouldExposeTheQueryTypeItHandles() {
+        assertThat(new FindApplicablePriceQueryHandler(findApplicablePriceService).queryType())
+                .isEqualTo(FindApplicablePriceQuery.class);
+    }
 }

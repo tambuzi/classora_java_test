@@ -42,7 +42,7 @@ class FindApplicablePriceServiceTest {
         Price low = tariff(0, LocalDateTime.of(2020, 6, 14, 0, 0), LocalDateTime.of(2020, 12, 31, 23, 59, 59));
         Price high = tariff(2, LocalDateTime.of(2020, 6, 14, 15, 0), LocalDateTime.of(2020, 6, 14, 18, 30));
         Price notApplicable = tariff(9, LocalDateTime.of(2020, 6, 15, 0, 0), LocalDateTime.of(2020, 6, 15, 11, 0));
-        when(priceFinder.findPricesFor(BRAND_ID, PRODUCT_ID)).thenReturn(List.of(mid, low, high, notApplicable));
+        when(priceFinder.findApplicableCandidates(BRAND_ID, PRODUCT_ID, APPLICATION_DATE)).thenReturn(List.of(mid, low, high, notApplicable));
 
         Price result = new FindApplicablePriceService(priceFinder).execute(BRAND_ID, PRODUCT_ID, APPLICATION_DATE);
 
@@ -52,7 +52,7 @@ class FindApplicablePriceServiceTest {
     @Test
     void shouldReturnTheOnlyApplicableTariff() {
         Price only = tariff(0, LocalDateTime.of(2020, 6, 14, 0, 0), LocalDateTime.of(2020, 12, 31, 23, 59, 59));
-        when(priceFinder.findPricesFor(BRAND_ID, PRODUCT_ID)).thenReturn(List.of(only));
+        when(priceFinder.findApplicableCandidates(BRAND_ID, PRODUCT_ID, APPLICATION_DATE)).thenReturn(List.of(only));
 
         Price result = new FindApplicablePriceService(priceFinder).execute(BRAND_ID, PRODUCT_ID, APPLICATION_DATE);
 
@@ -61,7 +61,7 @@ class FindApplicablePriceServiceTest {
 
     @Test
     void shouldFailWhenNoTariffExistsForTheProduct() {
-        when(priceFinder.findPricesFor(BRAND_ID, PRODUCT_ID)).thenReturn(List.of());
+        when(priceFinder.findApplicableCandidates(BRAND_ID, PRODUCT_ID, APPLICATION_DATE)).thenReturn(List.of());
 
         assertThatThrownBy(() -> new FindApplicablePriceService(priceFinder)
                 .execute(BRAND_ID, PRODUCT_ID, APPLICATION_DATE))
@@ -72,7 +72,7 @@ class FindApplicablePriceServiceTest {
     @Test
     void shouldFailWhenNoTariffAppliesAtTheRequestedDate() {
         Price future = tariff(0, LocalDateTime.of(2020, 6, 15, 0, 0), LocalDateTime.of(2020, 6, 15, 11, 0));
-        when(priceFinder.findPricesFor(BRAND_ID, PRODUCT_ID)).thenReturn(List.of(future));
+        when(priceFinder.findApplicableCandidates(BRAND_ID, PRODUCT_ID, APPLICATION_DATE)).thenReturn(List.of(future));
 
         assertThatThrownBy(() -> new FindApplicablePriceService(priceFinder)
                 .execute(BRAND_ID, PRODUCT_ID, APPLICATION_DATE))

@@ -1,7 +1,8 @@
 package com.classora.prices.infrastructure.userinterface.http.controllers;
 
+import com.classora.prices.application.bus.QueryBus;
 import com.classora.prices.application.query.FindApplicablePriceQuery;
-import com.classora.prices.application.query.FindApplicablePriceQueryHandler;
+import com.classora.prices.application.query.dto.FindApplicablePriceResult;
 import com.classora.prices.infrastructure.mapper.PriceQueryMapper;
 import com.classora.prices.infrastructure.mapper.PriceRestMapper;
 import com.classora.prices.infrastructure.userinterface.http.dto.FindApplicablePriceRequest;
@@ -18,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Prices", description = "Query the price applicable to a product of a brand at a given date")
 public class FindApplicablePriceController {
 
-    private final FindApplicablePriceQueryHandler findApplicablePriceQueryHandler;
+    private final QueryBus queryBus;
     private final PriceQueryMapper priceQueryMapper;
     private final PriceRestMapper priceRestMapper;
 
-    public FindApplicablePriceController(FindApplicablePriceQueryHandler findApplicablePriceQueryHandler,
+    public FindApplicablePriceController(QueryBus queryBus,
                                          PriceQueryMapper priceQueryMapper,
                                          PriceRestMapper priceRestMapper) {
-        this.findApplicablePriceQueryHandler = findApplicablePriceQueryHandler;
+        this.queryBus = queryBus;
         this.priceQueryMapper = priceQueryMapper;
         this.priceRestMapper = priceRestMapper;
     }
@@ -36,6 +37,7 @@ public class FindApplicablePriceController {
     @GetMapping
     public FindApplicablePriceResponse findApplicablePrice(FindApplicablePriceRequest request) {
         FindApplicablePriceQuery query = priceQueryMapper.toQuery(request);
-        return priceRestMapper.toResponse(findApplicablePriceQueryHandler.handle(query));
+        FindApplicablePriceResult result = queryBus.handle(query);
+        return priceRestMapper.toResponse(result);
     }
 }

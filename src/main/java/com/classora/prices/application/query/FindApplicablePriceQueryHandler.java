@@ -1,5 +1,6 @@
 package com.classora.prices.application.query;
 
+import com.classora.prices.application.bus.QueryHandler;
 import com.classora.prices.application.query.dto.FindApplicablePriceResult;
 import com.classora.prices.domain.entity.Price;
 import com.classora.prices.domain.service.FindApplicablePriceService;
@@ -8,7 +9,8 @@ import com.classora.prices.domain.valueobject.ProductId;
 
 import java.util.Objects;
 
-public class FindApplicablePriceQueryHandler {
+public class FindApplicablePriceQueryHandler
+        implements QueryHandler<FindApplicablePriceQuery, FindApplicablePriceResult> {
 
     private final FindApplicablePriceService findApplicablePriceService;
 
@@ -16,11 +18,17 @@ public class FindApplicablePriceQueryHandler {
         this.findApplicablePriceService = Objects.requireNonNull(findApplicablePriceService, "findApplicablePriceService must not be null");
     }
 
+    @Override
     public FindApplicablePriceResult handle(FindApplicablePriceQuery query) {
         Price price = findApplicablePriceService.execute(
                 new BrandId(query.brandId()),
                 new ProductId(query.productId()),
                 query.applicationDate());
         return FindApplicablePriceResult.from(price);
+    }
+
+    @Override
+    public Class<FindApplicablePriceQuery> queryType() {
+        return FindApplicablePriceQuery.class;
     }
 }

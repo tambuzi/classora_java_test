@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,6 +25,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PriceDatabaseFinderTest {
 
+    private static final LocalDateTime APPLICATION_DATE = LocalDateTime.of(2020, 6, 14, 16, 0, 0);
+
     @Mock
     private NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -31,13 +34,13 @@ class PriceDatabaseFinderTest {
     private PriceRowMapper priceRowMapper;
 
     @Test
-    void shouldReturnTheCandidateTariffsForTheBrandAndProduct() {
+    void shouldReturnTheApplicableCandidatesForTheBrandProductAndDate() {
         List<Price> candidates = List.of(PriceMother.withPriority(0), PriceMother.withPriority(1));
         when(jdbcTemplate.query(anyString(), any(SqlParameterSource.class), eq(priceRowMapper)))
                 .thenReturn(candidates);
 
         List<Price> result = new PriceDatabaseFinder(jdbcTemplate, priceRowMapper)
-                .findPricesFor(new BrandId(1L), new ProductId(35455L));
+                .findApplicableCandidates(new BrandId(1L), new ProductId(35455L), APPLICATION_DATE);
 
         assertThat(result).isEqualTo(candidates);
     }
