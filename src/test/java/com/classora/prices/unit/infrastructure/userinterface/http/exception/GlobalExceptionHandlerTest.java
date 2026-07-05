@@ -1,10 +1,11 @@
-package com.classora.prices.unit.infrastructure.userinterface.http.controllers;
+package com.classora.prices.unit.infrastructure.userinterface.http.exception;
 
 import com.classora.prices.application.exception.InvalidQueryException;
 import com.classora.prices.domain.exception.PriceNotFoundException;
 import com.classora.prices.domain.valueobject.BrandId;
 import com.classora.prices.domain.valueobject.ProductId;
 import com.classora.prices.infrastructure.userinterface.http.exception.GlobalExceptionHandler;
+import com.classora.prices.infrastructure.userinterface.http.exception.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -45,5 +46,13 @@ class GlobalExceptionHandlerTest {
 
         assertThat(problem.getStatus()).isEqualTo(400);
         assertThat(problem.getDetail()).isEqualTo("Brand id must be a positive number");
+    }
+
+    @Test
+    void shouldMapInvalidRequestTo400() {
+        ProblemDetail problem = handler.handleInvalidRequest(new InvalidRequestException("brandId must be a positive number"));
+
+        assertThat(problem.getStatus()).isEqualTo(400);
+        assertThat(problem.getDetail()).isEqualTo("brandId must be a positive number");
     }
 }

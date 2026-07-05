@@ -3,6 +3,7 @@ package com.classora.prices.infrastructure.userinterface.http.controllers;
 import com.classora.prices.application.bus.QueryBus;
 import com.classora.prices.application.query.FindApplicablePriceQuery;
 import com.classora.prices.application.query.dto.FindApplicablePriceResult;
+import com.classora.prices.application.validation.Validator;
 import com.classora.prices.infrastructure.mapper.PriceQueryMapper;
 import com.classora.prices.infrastructure.mapper.PriceRestMapper;
 import com.classora.prices.infrastructure.userinterface.http.dto.FindApplicablePriceRequest;
@@ -19,15 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Prices", description = "Query the price applicable to a product of a brand at a given date")
 public class FindApplicablePriceController {
 
-    private final QueryBus queryBus;
+    private final Validator<FindApplicablePriceRequest> requestValidator;
     private final PriceQueryMapper priceQueryMapper;
+    private final QueryBus queryBus;
     private final PriceRestMapper priceRestMapper;
 
-    public FindApplicablePriceController(QueryBus queryBus,
+    public FindApplicablePriceController(Validator<FindApplicablePriceRequest> requestValidator,
                                          PriceQueryMapper priceQueryMapper,
+                                         QueryBus queryBus,
                                          PriceRestMapper priceRestMapper) {
-        this.queryBus = queryBus;
+        this.requestValidator = requestValidator;
         this.priceQueryMapper = priceQueryMapper;
+        this.queryBus = queryBus;
         this.priceRestMapper = priceRestMapper;
     }
 
@@ -36,6 +40,7 @@ public class FindApplicablePriceController {
                     + "resolving overlapping tariffs by highest priority.")
     @GetMapping
     public FindApplicablePriceResponse findApplicablePrice(FindApplicablePriceRequest request) {
+        requestValidator.validate(request);
         FindApplicablePriceQuery query = priceQueryMapper.toQuery(request);
         FindApplicablePriceResult result = queryBus.handle(query);
         return priceRestMapper.toResponse(result);

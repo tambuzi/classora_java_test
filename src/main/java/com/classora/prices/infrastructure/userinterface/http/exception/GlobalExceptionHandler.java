@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return problemDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ProblemDetail handleInvalidRequest(InvalidRequestException exception) {
+        return problemDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
     private ProblemDetail problemDetail(HttpStatus status, String detail) {
         return ProblemDetail.forStatusAndDetail(status, detail);
     }

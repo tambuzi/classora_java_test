@@ -4,7 +4,7 @@ Spring Boot service that returns the price applicable to a product of a brand at
 
 ## Architecture
 
-Hexagonal architecture with DDD building blocks and CQS (query side only — the service is read-only):
+Hexagonal architecture with DDD and CQS:
 
 ```
 com.classora.prices
@@ -26,24 +26,31 @@ com.classora.prices
 │   ├── bus
 │   │   ├── Query.java
 │   │   ├── QueryHandler.java
-│   │   ├── QueryBus.java
-│   │   └── NoQueryHandlerException.java
+│   │   └── QueryBus.java
+│   ├── validation
+│   │   ├── Validator.java
+│   │   └── QueryValidator.java
 │   ├── query
 │   │   ├── FindApplicablePriceQuery.java
 │   │   ├── FindApplicablePriceQueryHandler.java
+│   │   ├── FindApplicablePriceQueryValidator.java
 │   │   └── dto
 │   │       └── FindApplicablePriceResult.java
 │   └── exception
-│       └── InvalidQueryException.java
+│       ├── InvalidQueryException.java
+│       └── NoQueryHandlerException.java
 └── infrastructure
     ├── userinterface/http
     │   ├── controllers
     │   │   └── FindApplicablePriceController.java
     │   ├── exception
-    │   │   └── GlobalExceptionHandler.java
+    │   │   ├── GlobalExceptionHandler.java
+    │   │   └── InvalidRequestException.java
     │   ├── dto
     │   │   ├── FindApplicablePriceRequest.java
     │   │   └── FindApplicablePriceResponse.java
+    │   ├── validation
+    │   │   └── FindApplicablePriceRequestValidator.java
     │   └── routes
     │       └── Routes.java
     ├── persistence
@@ -56,7 +63,8 @@ com.classora.prices
     │   └── PriceRowMapper.java
     └── config
         ├── ServiceBeanConfiguration.java
-        └── QueryHandlerBeanConfiguration.java
+        ├── QueryHandlerBeanConfiguration.java
+        └── ValidatorBeanConfiguration.java
 
 src/main/resources
 ├── application.yml
@@ -118,8 +126,6 @@ Tests are grouped by type under `src/test/java/com/classora/prices/`:
 ```bash
 ./gradlew pitest   # report in build/reports/pitest — currently 100% mutation score on the core logic
 ```
-
-**CI**: `.github/workflows/ci.yml` runs `./gradlew check` on every push and pull request to `main`.
 
 Mandated cases:
 

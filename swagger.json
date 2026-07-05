@@ -1,0 +1,106 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "OpenAPI definition",
+        "version": "v0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Prices",
+            "description": "Query the price applicable to a product of a brand at a given date"
+        }
+    ],
+    "paths": {
+        "/api/v1/prices": {
+            "get": {
+                "tags": [
+                    "Prices"
+                ],
+                "summary": "Find the applicable price",
+                "description": "Returns the tariff that applies to the product of the brand at the given date, resolving overlapping tariffs by highest priority.",
+                "operationId": "findApplicablePrice",
+                "parameters": [
+                    {
+                        "name": "request",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/FindApplicablePriceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FindApplicablePriceResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "FindApplicablePriceRequest": {
+                "type": "object",
+                "properties": {
+                    "applicationDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "productId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "brandId": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "FindApplicablePriceResponse": {
+                "type": "object",
+                "description": "Applicable price for the requested product, brand and date",
+                "properties": {
+                    "productId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "brandId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "priceList": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "price": {
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
